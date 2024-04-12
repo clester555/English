@@ -10,8 +10,8 @@ class GameScene extends Phaser.Scene{
         this.shapes = ["circle","dot","heart","line","oval","rectangle","square","star","triangle"]
         //this.load.image("wrongImage","/assets/images/wrong.png");
         for(let i = 0; i<this.shapes.length;i++){
-            this.load.image(this.shapes[i]+"Image", "assets/images/"+this.shapes[i]+".png");
-            this.load.audio(this.shapes[i]+"Audio","assets/sounds/"+this.shapes[i]+".mp3");
+            this.load.image(this.shapes[i]+"Image", "../assets/images/"+this.shapes[i]+".png");
+            this.load.audio(this.shapes[i]+"Audio","../assets/sounds/"+this.shapes[i]+".mp3");
         }
         
     }
