@@ -9,9 +9,11 @@ class GameScene extends Phaser.Scene{
     preload(){
         this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
         this.shapes = ["circle","dot","heart","line","oval","rectangle","square","star","triangle"]
+        this.load.audio('explosionAudio','assets/sounds/explode.mp3');
         for(let i = 0; i<this.shapes.length;i++){
             this.load.image(this.shapes[i]+"Image", "assets/images/"+this.shapes[i]+".png");
-            this.load.audio(this.shapes[i]+"Audio","assets/sounds/"+this.shapes[i]+".mp3");
+            this.load.audio(this.shapes[i]+"Audio",["assets/sounds/"+this.shapes[i]+".mp3",
+                                                    "assets/sounds/"+this.shapes[i]+".ogg"]);
         }
         
     }
@@ -22,7 +24,9 @@ class GameScene extends Phaser.Scene{
              this.sounds[i] = this.sound.add(this.shapes[i]+"Audio");
 
         }
-        
+        this.explosionAudio = this.sound.add('explosionAudio',{volume:0.1});
+        this.explosionAudio.setSeek(1);
+
         this.makeClock();
         this.makeStartButton();
         this.makeButtons();
@@ -33,11 +37,12 @@ class GameScene extends Phaser.Scene{
         {
             
             if(gameObject.name == this.shapes[this.answer]){
-                this.makeNewPrompt();
                 emitter.x =gameObject.x;
                 emitter.y =gameObject.y;
                 gameObject.destroy();
+                this.explosionAudio.play();
                 emitter.explode(16);
+                this.makeNewPrompt();
             } else{
                 
             }
