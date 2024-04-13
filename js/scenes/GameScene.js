@@ -7,8 +7,8 @@ class GameScene extends Phaser.Scene{
     }
 
     preload(){
+        this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
         this.shapes = ["circle","dot","heart","line","oval","rectangle","square","star","triangle"]
-        //this.load.image("wrongImage","/assets/images/wrong.png");
         for(let i = 0; i<this.shapes.length;i++){
             this.load.image(this.shapes[i]+"Image", "assets/images/"+this.shapes[i]+".png");
             this.load.audio(this.shapes[i]+"Audio","assets/sounds/"+this.shapes[i]+".mp3");
@@ -34,6 +34,12 @@ class GameScene extends Phaser.Scene{
             
             if(gameObject.name == this.shapes[this.answer]){
                 this.makeNewPrompt();
+                emitter.x =gameObject.x;
+                emitter.y =gameObject.y;
+                gameObject.destroy();
+                emitter.explode(16);
+            } else{
+                
             }
             
             
@@ -42,6 +48,17 @@ class GameScene extends Phaser.Scene{
        
         this.timedEvent = this.time.addEvent({ delay: 100, callback: this.onEvent, callbackScope: this,loop:true });
        
+        const emitter = this.add.particles(400, 250, 'flares', {
+            frame: [ 'red', 'yellow', 'green' ],
+            lifespan: 4000,
+            speed: { min: 150, max: 250 },
+            scale: { start: 0.8, end: 0 },
+            gravityY: 150,
+            blendMode: 'ADD',
+            emitting: false
+        });
+
+
     }
 
     update(){
@@ -56,6 +73,7 @@ class GameScene extends Phaser.Scene{
                 this.seconds -= 1;
             }
             this.countDownClock.text = this.seconds + "." + this.tenthsOfSecond;
+            this.randomTints(this.buttons[Phaser.Math.Between(0,8)]);
         }
     }
 
@@ -79,13 +97,15 @@ class GameScene extends Phaser.Scene{
     
     makeButtons(){
         this.buttons = [];
+        this.wrongButtons = [];
         for(let i = 0; i<this.shapes.length;i++){
-            this.buttons[i] = this.add.image(i*100,0,this.shapes[i]+"Image");
+            this.buttons[i] = this.add.sprite(i*100,0,this.shapes[i]+"Image");
             this.buttons[i].setName(this.shapes[i]);
             this.buttons[i].setInteractive();
             this.buttons[i].setScale(0.5,0.5);
             this.buttons[i].setPosition(i*64+150,300);
             this.buttons[i].setVisible(false);
+            this.randomTints(this.buttons[i]);
         }
    
     }
@@ -136,8 +156,26 @@ class GameScene extends Phaser.Scene{
     }
 
     makeNewPrompt(){
-        this.answer = Math.floor(Math.random() * this.shapes.length);
+        let old = this.answer;
+        while (old == this.answer){
+            this.answer = Math.floor(Math.random() * this.shapes.length);
+        }
         this.prompt.text = this.shapes[this.answer];
         this.sounds[this.answer].play();
+
     }
+
+    randomTints(gameObject){
+        gameObject.setTint(this.getRandomColor(), this.getRandomColor(), this.getRandomColor(), this.getRandomColor());
+    }
+
+    getRandomColor(){
+        let r = Phaser.Math.Between(0,255);
+        let g = Phaser.Math.Between(0,255);
+        let b = Phaser.Math.Between(0,255);
+        return Phaser.Display.Color.GetColor(r,g,b);
+    }
+
+
 }
+
