@@ -8,7 +8,7 @@ class GameScene extends Phaser.Scene{
 
     preload(){
         let wordList = ["circle","dot","heart","line","oval","rectangle","square","star","triangle"]
-        let secretWordList = ["Drum","Rabbit"];
+        let secretWordList = ["drum","rabbit","draw","ground","frog"];
         this.words = [];
         this.secretWords = [];
         
@@ -21,7 +21,7 @@ class GameScene extends Phaser.Scene{
 
         for(let i = 0; i<secretWordList.length;i++){
             this.secretWords[i] = new Word(secretWordList[i]);
-            //this.word[i].setImage(this.load.image(this.shapes[i]+"Image", "assets/images/"+this.words[i]+".png"));
+            this.secretWords[i].setImage(this.load.image(secretWordList[i]+"Image", "assets/images/"+secretWordList[i]+".jpg"));
             //this.word[i].setAudio(this.load.audio(this.shapes[i]+"Audio",["assets/sounds/"+this.shapes[i]+".mp3",
             //                                        "assets/sounds/"+this.shapes[i]+".ogg"]));
         }
@@ -36,6 +36,7 @@ class GameScene extends Phaser.Scene{
         this.sounds = [];
         this.prompts = [];
         this.promptIndex = 0;
+        this.isPlaying = false;
 
         this.explosionAudio = this.sound.add('explosionAudio',{volume:0.1});
 
@@ -45,7 +46,17 @@ class GameScene extends Phaser.Scene{
         
         this.input.on('gameobjectdown', (pointer, gameObject) =>
         {
-            console.log(this.prompts[this.promptIndex].text);
+            if(this.isPlaying == false){
+                return;
+            }
+            
+            console.log(this.secertWord.text);
+            console.log(gameObject.name);
+            if(gameObject.name == this.secertWord.text){
+                this.reset();
+                this.startGame();
+                return;
+            }
             if(gameObject.name == this.prompts[this.promptIndex].text){
                 emitter.x =gameObject.x;
                 emitter.y =gameObject.y;
@@ -57,14 +68,20 @@ class GameScene extends Phaser.Scene{
                 gameObject.destroy();
                 this.explosionAudio.play();
                 emitter.explode(16);
-                this.promptIndex+=1;
-                this.makeNewPrompt();
-            } else{
+                if(this.promptIndex<this.secertWord.text.length-1){
+                    this.promptIndex+=1;
+                    this.makeNewPrompt();
+                }else{
+                        this.prompt.setVisible(false);
+                }
+                
+            
                 
             }
-            
+         
         });
        
+
         this.timedEvent = this.time.addEvent({ delay: 100, callback: this.onEvent, callbackScope: this,loop:true });
        
         const emitter = this.add.particles(400, 250, 'flares', {
@@ -106,6 +123,19 @@ class GameScene extends Phaser.Scene{
         this.seconds = 60;
         this.isPlaying = true;
         this.makeSecretWord();
+        let x = [];
+        for(let i = 0;i<this.secretWords.length;i++){
+            x[i] = this.add.image(i*140+110,500,this.secretWords[i].text+"Image")
+            x[i].name = this.secretWords[i].text;
+            x[i].setInteractive();
+        }
+        x[0].scale =.3;
+        x[1].scale =.2;
+        x[2].scale =.1;
+        x[3].scale =.1;
+        x[4].scale =.2;
+        
+        
     }
     
     makeStartButton(){
@@ -231,6 +261,14 @@ class GameScene extends Phaser.Scene{
         this.makeNewPrompt();
     }
 
+    reset(){
+        for(let i = 0;i<this.secretLetters.length;i++){
+            this.secretLetters[i].destroy();
+        }
+        for(let i = 0;i<this.buttons.length;i++){
+            this.buttons[i].destroy();
+        }
+    }
 
 }
 
