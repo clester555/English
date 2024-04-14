@@ -82,23 +82,7 @@ class GameScene extends Phaser.Scene{
                         this.playerHearts-=1;
                         this.heartContainers[this.playerHearts].setVisible(false);
                         if(this.playerHearts == 0){
-                            this.isPlaying = false;
-                            this.prompt.setVisible(false);
-                            for(let i = 0;i<this.buttons.length;i++){
-                                this.buttons[i].destroy();
-                            }
-                            for(let i = 0;i<this.secretLetters.length;i++){
-                                this.secretLetters[i].setVisible(true);
-                            }
-                            for(let i = 0;i<this.secertWordChoices.length;i++)
-                            {
-                                if (this.secertWord.text != this.secertWordChoices[i].name){
-                                    this.secertWordChoices[i].destroy();
-                                }
-                            }
-                            this.gameover.setVisible(true);
-                            this.startButton.y = 350;
-                            this.startButton.setVisible(true);
+                           this.endGame();
                         }
                     }
                     return;
@@ -170,6 +154,12 @@ class GameScene extends Phaser.Scene{
                 this.seconds -= 1;
             }
             this.countDownClock.text = this.seconds + "." + this.tenthsOfSecond;
+            if (this.seconds == 0 && this.tenthsOfSecond == 0){
+                this.endGame();
+            }
+            if(this.seconds<0){
+                this.endGame();
+            }
             //this.randomTints(this.buttons[Phaser.Math.Between(0,8)]);
         }
     }
@@ -349,6 +339,26 @@ class GameScene extends Phaser.Scene{
         for(let i = 0; i<this.secertWordChoices; i++){
             this.secretWordChoices[i].destroy();
         }
+    }
+
+    endGame(){
+        this.isPlaying = false;
+        this.prompt.setVisible(false);
+        for(let i = 0;i<this.buttons.length;i++){
+            this.buttons[i].destroy();
+        }
+        for(let i = 0;i<this.secretLetters.length;i++){
+            this.secretLetters[i].setVisible(true);
+        }
+        for(let i = 0;i<this.secertWordChoices.length;i++)
+        {
+            if (this.secertWord.text != this.secertWordChoices[i].name){
+                this.secertWordChoices[i].destroy();
+            }
+        }
+        this.gameover.setVisible(true);
+        this.startButton.y = 350;
+        this.startButton.setVisible(true);
     }
 
 }
