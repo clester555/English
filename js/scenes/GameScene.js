@@ -101,6 +101,7 @@ class GameScene extends Phaser.Scene{
                             this.startButton.setVisible(true);
                         }
                     }
+                    return;
                 }
             }
           
@@ -126,6 +127,12 @@ class GameScene extends Phaser.Scene{
                 
             
                 
+            }else{
+                this.points-=1;
+                if (this.points<0){
+                    this.points = 0;
+                }
+                this.pointCounter.text = this.points;
             }
          
         });
