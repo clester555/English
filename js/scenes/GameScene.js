@@ -27,6 +27,8 @@ class GameScene extends Phaser.Scene{
         }
         this.load.atlas('flares', 'assets/particles/flares.png', 'assets/particles/flares.json');
         this.load.audio('explosionAudio','assets/sounds/explode.mp3');
+        this.load.image('heartContainerImage','assets/images/heartContainer.png');
+        this.load.audio('buzzerEffectAudio','assets/sounds/buzzerEffect.mp3');
        
     }
 
@@ -37,8 +39,25 @@ class GameScene extends Phaser.Scene{
         this.prompts = [];
         this.promptIndex = 0;
         this.isPlaying = false;
+        this.secertWordSet = false;
 
         this.explosionAudio = this.sound.add('explosionAudio',{volume:0.1});
+        this.buzzerEffectAudio = this.sound.add('buzzerEffectAudio',{volume:0.7});
+
+        this.gameover = this.add.text(140,100,"GAME OVER",{
+            fontFamily: 'Arial',
+            fontSize: 80,
+            color: "#fff200"
+        });
+
+        this.pointCounter = this.add.text(35,5,0,{
+            fontFamily: 'Arial',
+            fontSize: 64,
+            color: "#fff200"
+        });
+        this.pointCounter.setVisible(false);
+
+        this.gameover.setVisible(false);
 
         this.makeClock();
         this.makeStartButton();
@@ -50,14 +69,43 @@ class GameScene extends Phaser.Scene{
                 return;
             }
             
-            console.log(this.secertWord.text);
-            console.log(gameObject.name);
-            if(gameObject.name == this.secertWord.text){
-                this.reset();
-                this.startGame();
-                return;
+            for(let i = 0; i<this.secretWords.length;i++){
+                if(gameObject.name == this.secretWords[i].text){
+                    if(gameObject.name == this.secertWord.text){
+                        this.points+=100;
+                        this.pointCounter.text = this.points;
+                        this.reset();
+                        this.startGame();
+                        return;
+                    }else{
+                        this.buzzerEffectAudio.play();
+                        this.playerHearts-=1;
+                        this.heartContainers[this.playerHearts].setVisible(false);
+                        if(this.playerHearts == 0){
+                            this.isPlaying = false;
+                            this.prompt.setVisible(false);
+                            for(let i = 0;i<this.buttons.length;i++){
+                                this.buttons[i].destroy();
+                            }
+                            for(let i = 0;i<this.secretLetters.length;i++){
+                                this.secretLetters[i].setVisible(true);
+                            }
+                            for(let i = 0;i<this.secertWordChoices.length;i++)
+                            {
+                                if (this.secertWord.text != this.secertWordChoices[i].name){
+                                    this.secertWordChoices[i].destroy();
+                                }
+                            }
+                            this.gameover.setVisible(true);
+                            this.startButton.setVisible(true);
+                        }
+                    }
+                }
             }
+          
             if(gameObject.name == this.prompts[this.promptIndex].text){
+                this.points+=10;
+                this.pointCounter.text = this.points;
                 emitter.x =gameObject.x;
                 emitter.y =gameObject.y;
                for(let i = 0;i<this.buttons.length;i++){
@@ -93,7 +141,12 @@ class GameScene extends Phaser.Scene{
             blendMode: 'ADD',
             emitting: false
         });
-
+        this.heartContainers = [];
+        for(let i = 0;i<3;i++){
+            this.heartContainers[i] = this.add.image(50+i*50,85,"heartContainerImage");
+            this.heartContainers[i].scale[2];
+            this.heartContainers[i].setVisible(false);
+        }
 
     }
 
@@ -116,24 +169,30 @@ class GameScene extends Phaser.Scene{
     
 
     startGame(){
+      
+        for(let i = 0; i<this.secretLetters.length;i++){
+            this.secretLetters[i].destroy();
+        }
+        
+        this.gameover.setVisible(false);
         this.startButton.setVisible(false);
         this.countDownClock.setVisible(true);
         this.prompt.setVisible(true);
         this.tenthsOfSecond =0;
-        this.seconds = 60;
+     
         this.isPlaying = true;
         this.makeSecretWord();
-        let x = [];
+        this.secertWordChoices = [];
         for(let i = 0;i<this.secretWords.length;i++){
-            x[i] = this.add.image(i*140+110,500,this.secretWords[i].text+"Image")
-            x[i].name = this.secretWords[i].text;
-            x[i].setInteractive();
+            this.secertWordChoices[i] = this.add.image(i*140+110,500,this.secretWords[i].text+"Image")
+            this.secertWordChoices[i].name = this.secretWords[i].text;
+            this.secertWordChoices[i].setInteractive();
         }
-        x[0].scale =.3;
-        x[1].scale =.2;
-        x[2].scale =.1;
-        x[3].scale =.1;
-        x[4].scale =.2;
+        this.secertWordChoices[0].scale =.3;
+        this.secertWordChoices[1].scale =.2;
+        this.secertWordChoices[2].scale =.1;
+        this.secertWordChoices[3].scale =.1;
+        this.secertWordChoices[4].scale =.2;
         
         
     }
@@ -159,15 +218,24 @@ class GameScene extends Phaser.Scene{
         });
 
         this.startButton.on('pointerup',() => {
+            this.playerHearts = 3;
+            this.points = 0;
+            this.pointCounter.text = this.points;
+            this.pointCounter.setVisible(true);
+            for(let i = 0;i<this.playerHearts;i++){
+                this.heartContainers[i].setVisible(true);
+            }
+            this.seconds = 60;
+            this.tenthsOfSecond = 0;
             this.startGame();
         });
 
     }
     makeClock(){
-        this.countDownClock = this.add.text(640,10,60,{
+        this.countDownClock = this.add.text(640,5,60,{
             fontFamily: 'Arial',
             fontSize: 64,
-            color: "#00ff00"
+            color: "#ffffff"
         })
         this.countDownClock.setVisible(false);
     }
@@ -238,6 +306,7 @@ class GameScene extends Phaser.Scene{
             this.randomTints(this.buttons[i]);
         }
      
+        this.prompts = [];
         for(let i = 0;i<this.secertWord.text.length;i++){
             this.prompts[i] = this.words[wordList[i]];
         }
@@ -252,7 +321,7 @@ class GameScene extends Phaser.Scene{
             this.prompts[i]=this.prompts[a];
             this.prompts[a] = temp;
         }
-       
+        
         this.promptIndex = 0;
 
         for(let i = 0;i<this.prompts.length;i++){
@@ -262,11 +331,15 @@ class GameScene extends Phaser.Scene{
     }
 
     reset(){
+        this.prompt.setVisible(false);
         for(let i = 0;i<this.secretLetters.length;i++){
             this.secretLetters[i].destroy();
         }
         for(let i = 0;i<this.buttons.length;i++){
             this.buttons[i].destroy();
+        }
+        for(let i = 0; i<this.secertWordChoices; i++){
+            this.secretWordChoices[i].destroy();
         }
     }
 
