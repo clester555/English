@@ -44,7 +44,7 @@ class GameScene extends Phaser.Scene{
         this.explosionAudio = this.sound.add('explosionAudio',{volume:0.1});
         this.buzzerEffectAudio = this.sound.add('buzzerEffectAudio',{volume:0.7});
 
-        this.gameover = this.add.text(140,100,"GAME OVER",{
+        this.gameover = this.add.text(150,100,"GAME OVER",{
             fontFamily: 'Arial',
             fontSize: 80,
             color: "#fff200"
@@ -97,6 +97,7 @@ class GameScene extends Phaser.Scene{
                                 }
                             }
                             this.gameover.setVisible(true);
+                            this.startButton.y = 350;
                             this.startButton.setVisible(true);
                         }
                     }
